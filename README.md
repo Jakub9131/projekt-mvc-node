@@ -1,29 +1,29 @@
 DeskZone - System Rezerwacji Przestrzeni Biurowych
 
-Opis funkcjonalnoœci aplikacji
-DeskZone to nowoczesna aplikacja webowa typu SaaS, zbudowana w architekturze MVC (Model-View-Controller), s³u¿¹ca do kompleksowego zarz¹dzania zasobami biurowymi oraz rezerwacjami sal konferencyjnych w strukturze korporacyjnej.
+Opis funkcjonalnoÅ›ci aplikacji
+DeskZone to nowoczesna aplikacja webowa typu SaaS, zbudowana w architekturze MVC (Model-View-Controller), sÅ‚uÅ¼Ä…ca do kompleksowego zarzÄ…dzania zasobami biurowymi oraz rezerwacjami sal konferencyjnych w strukturze korporacyjnej.
 
-G³ówne funkcjonalnoœci systemu:
-  *System Autoryzacji (Auth): Logowanie i rejestracja u¿ytkowników z szyfrowaniem hase³ algorytmem `bcrypt` oraz walidacj¹ si³y has³a na backendzie. Obs³uga sesji u¿ytkownika (`express-session`).
-  *Zarz¹dzanie Salami (CRUD): Pracownicy mog¹ przegl¹daæ dostêpne sale i filtrowaæ je dynamicznie po miastach.
-  *Administrator posiada pe³ne uprawnienia do dodawania nowej sali, edycji istniej¹cej (okno modalne) oraz jej bezwzglêdnego usuwania.
+GÅ‚Ã³wne funkcjonalnoÅ›ci systemu:
+  *System Autoryzacji (Auth): Logowanie i rejestracja uÅ¼ytkownikÃ³w z szyfrowaniem haseÅ‚ algorytmem `bcrypt` oraz walidacjÄ… siÅ‚y hasÅ‚a na backendzie. ObsÅ‚uga sesji uÅ¼ytkownika (`express-session`).
+  *ZarzÄ…dzanie Salami (CRUD): Pracownicy mogÄ… przeglÄ…daÄ‡ dostÄ™pne sale i filtrowaÄ‡ je dynamicznie po miastach.
+  *Administrator posiada peÅ‚ne uprawnienia do dodawania nowej sali, edycji istniejÄ…cej (okno modalne) oraz jej bezwzglÄ™dnego usuwania.
 Zaawansowany System Rezerwacji:
-  *Rezerwacje mo¿liwe s¹ wy³¹cznie w godzinach otwarcia biura (07:00 - 23:00) na czas od 1 do 12 godzin.
-  *Pracownik mo¿e samodzielnie anulowaæ swoj¹ rezerwacjê najpóŸniej na 48 godzin przed jej rozpoczêciem.
-  *Algorytm Anti-Overlapping: Pancerna ochrona przed nak³adaniem siê rezerwacji w bazie danych PostgreSQL przy u¿yciu operacji na przedzia³ach czasowych.
-Panel Administratora (Zarz¹dzanie zasobami i ludŸmi):
-  *Mo¿liwoœæ rezerwowania sal w imieniu dowolnego pracownika.
-  *Modyfikacja i edycja rezerwacji pracowników (z automatycznym powiadomieniem systemowym).
-  *Usuwanie rezerwacji z podaniem powodu, który jest przesy³any do poszkodowanego u¿ytkownika.
-  *Pe³ne operacje CRUD na kontach u¿ytkowników (tworzenie, edycja, usuwanie pracowników).
-System Powiadomieñ i Statystyk: Dynamiczne powiadomienia o odwo³anych spotkaniach oraz zaawansowane statystyki wykorzystania sal (TOP 5).
+  *Rezerwacje moÅ¼liwe sÄ… wyÅ‚Ä…cznie w godzinach otwarcia biura (07:00 - 23:00) na czas od 1 do 12 godzin.
+  *Pracownik moÅ¼e samodzielnie anulowaÄ‡ swojÄ… rezerwacjÄ™ najpÃ³Åºniej na 48 godzin przed jej rozpoczÄ™ciem.
+  *Algorytm Anti-Overlapping: Pancerna ochrona przed nakÅ‚adaniem siÄ™ rezerwacji w bazie danych PostgreSQL przy uÅ¼yciu operacji na przedziaÅ‚ach czasowych.
+Panel Administratora (ZarzÄ…dzanie zasobami i ludÅºmi):
+  *MoÅ¼liwoÅ›Ä‡ rezerwowania sal w imieniu dowolnego pracownika.
+  *Modyfikacja i edycja rezerwacji pracownikÃ³w (z automatycznym powiadomieniem systemowym).
+  *Usuwanie rezerwacji z podaniem powodu, ktÃ³ry jest przesyÅ‚any do poszkodowanego uÅ¼ytkownika.
+  *PeÅ‚ne operacje CRUD na kontach uÅ¼ytkownikÃ³w (tworzenie, edycja, usuwanie pracownikÃ³w).
+System PowiadomieÅ„ i Statystyk: Dynamiczne powiadomienia o odwoÅ‚anych spotkaniach oraz zaawansowane statystyki wykorzystania sal (TOP 5).
 
 ---
 
 Instrukcja uruchomienia aplikacji 
 Wymagania systemowe:
-* Zainstalowane œrodowisko Node.js 
-* Dostêp do bazy danych  PostgreSQL
+* Zainstalowane Å›rodowisko Node.js 
+* DostÄ™p do bazy danych  PostgreSQL
 
 Krok po kroku:
 
@@ -36,5 +36,6 @@ DB_USER='UZYTKOWNIK'
 DB_PASSWORD='HASLO'
 DB_HOST=localhost
 DB_DIALECT=postgres
-4. node run-seed.js (wgranie danych testowych)
-5. npm start
+4. npm run dev (na chwile, tak Å¼eby baza danych pobraÅ‚a tabele)
+5. node run-seed.js (wgranie danych testowych)
+6. npm start
