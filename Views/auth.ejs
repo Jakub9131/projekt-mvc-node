@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeskZone - Autoryzacja</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-hover: #059669;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--background); 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* Jeden wyśrodkowany, elegancki kontener biznesowy */
+        .auth-card { 
+            background: var(--surface); 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); 
+            max-width: 420px; 
+            width: 90%; 
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .auth-heading { 
+            color: var(--text-main); 
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .auth-subheading {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-weight: 500; 
+            font-size: 14px; 
+            color: var(--text-main);
+        }
+
+        .form-group input { 
+            width: 100%; 
+            padding: 11px 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 15px;
+            background-color: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        .backend-error {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid #fca5a5;
+            text-align: center;
+        }
+
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: white; 
+            transition: background-color 0.2s, transform 0.1s; 
+            margin-top: 8px;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-login { background-color: var(--primary); }
+        .btn-login:hover { background-color: var(--primary-hover); }
+        .btn-register { background-color: var(--success); }
+        .btn-register:hover { background-color: var(--success-hover); }
+
+        /* Stopka przełączania trybów */
+        .auth-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Ukrywanie sekcji z płynnym przenikaniem */
+        .auth-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        
+        <div id="loginSection" class="auth-section" style="display: block;">
+            <h2 class="auth-heading">🔑 Witaj w DeskZone</h2>
+            <p class="auth-subheading">Zaloguj się, aby zarządzać rezerwacjami sal</p>
+            
+            <% if (typeof errorMessage !== 'undefined' && errorMessage && typeof isRegisterError === 'undefined') { %>
+                <div class="backend-error">⚠️ <%= errorMessage %></div>
+            <% } %>
+
+            <form action="/auth/login" method="POST">
+                <div class="form-group">
+                    <label for="login-email">E-mail firmowy:</label>
+                    <input type="email" id="login-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Hasło:</label>
+                    <input type="password" id="login-password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-login">Zaloguj się</button>
+            </form>
+            
+            <div class="auth-footer">
+                Nie masz jeszcze konta? <a onclick="toggleAuthMode('register')">Zarejestruj się</a>
+            </div>
+        </div>
+
+        <div id="registerSection" class="auth-section">
+            <h2 class="auth-heading">📝 Rejestracja konta</h2>
+            <p class="auth-subheading">Dołącz do systemu rezerwacji przestrzeni</p>
+            
+            <% if (typeof errorMessage !== 'undefined' && errorMessage && typeof isRegisterError !== 'undefined' && isRegisterError) { %>
+                <div class="backend-error">⚠️ <%= errorMessage %></div>
+            <% } %>
+
+            <form id="registerForm" action="/auth/register" method="POST">
+                <div class="form-group">
+                    <label for="reg-firstName">Imię:</label>
+                    <input type="text" id="reg-firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-lastName">Nazwisko:</label>
+                    <input type="text" id="reg-lastName" name="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">E-mail firmowy:</label>
+                    <input type="email" id="reg-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Hasło:</label>
+                    <input type="password" id="reg-password" name="password" minlength="8" 
+                           pattern="(?=.*\d)(?=.*[A-Z]).{8,}" 
+                           title="Hasło musi składać się z przynajmniej 8 znaków, zawierać minimum jedną wielką literę oraz jedną cyfrę." 
+                           required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-confirmPassword">Powtórz hasło:</label>
+                    <input type="password" id="reg-confirmPassword" name="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn btn-register">Zarejestruj się</button>
+            </form>
+            
+            <div class="auth-footer">
+                Masz już konto? <a onclick="toggleAuthMode('login')">Zaloguj się</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Funkcja przełączająca widoki formularzy
+        function toggleAuthMode(mode) {
+            const loginSection = document.getElementById('loginSection');
+            const registerSection = document.getElementById('registerSection');
+
+            if (mode === 'register') {
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'block';
+            } else {
+                registerSection.style.display = 'none';
+                loginSection.style.display = 'block';
+            }
+        }
+
+        // Walidacja zgodności haseł
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                event.preventDefault();
+                alert('🛑 Podane hasła nie są identyczne! Upewnij się, że wpisałeś dokładnie to samo hasło w obu polach.');
+            }
+        });
+
+        // INTEGRACJA Z BACKENDEM: Jeśli serwer wypluje błąd rejestracji, automatycznie otwórz panel rejestracji
+        <% if (typeof isRegisterError !== 'undefined' && isRegisterError) { %>
+            toggleAuthMode('register');
+        <% } %>
+    </script>
+</body>
+</html>

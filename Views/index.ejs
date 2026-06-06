@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeskZone - Rezerwacja Sal</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #b45309;
+            --warning-bg: #fef3c7;
+            --warning-border: #fde68a;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --amber: #d97706;
+            --amber-hover: #b45309;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background-color: var(--background); 
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        h1 { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-top: 0; margin-bottom: 20px; }
+        
+        /* Menu Nawigacyjne */
+        .nav-menu { 
+            background: var(--surface); 
+            padding: 0 24px; 
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            margin-bottom: 35px; 
+            border: 1px solid var(--border);
+        }
+        .nav-links { display: flex; align-items: center; }
+        .nav-menu a { 
+            margin-right: 24px; 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+            padding: 20px 0;
+            position: relative;
+        }
+        .nav-menu a:hover { color: var(--primary); }
+        .nav-menu a.active { 
+            color: var(--primary); 
+            font-weight: 600;
+        }
+        .nav-menu a.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0;
+        }
+        .user-panel { font-size: 0.9rem; color: var(--text-main); }
+        .user-role { color: var(--primary); font-weight: 600; }
+        .logout-link { color: var(--danger) !important; margin-left: 12px; text-decoration: none; font-weight: 600; }
+        .logout-link:hover { color: var(--danger-hover) !important; }
+
+        /* Komunikaty systemowe */
+        .notification-box {
+            background-color: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid var(--warning-border);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .notification-box h3 { margin-top: 0; margin-bottom: 12px; font-size: 1.05rem; font-weight: 600; color: #92400e; }
+        .notification-list { margin-bottom: 15px; padding-left: 20px; }
+        .notification-list li { margin-bottom: 8px; font-size: 0.95rem; }
+        .notification-list small { color: #b45309; opacity: 0.8; margin-left: 5px; }
+        .btn-hide-notif {
+            background: #92400e; color: white; padding: 8px 14px; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; width: auto;
+        }
+        .btn-hide-notif:hover { opacity: 0.9; }
+
+        /* Formularz dodawania sali */
+        .box { 
+            background: var(--surface); 
+            padding: 28px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            margin-bottom: 35px; 
+            max-width: 550px; 
+            border: 1px solid var(--border);
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
+        .form-group input[type="text"], .form-group input[type="number"], .form-group select { 
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; background-color: #fff; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 0.92rem; cursor: pointer; }
+        .checkbox-label input { width: 16px; height: 16px; accent-color: var(--primary); }
+        
+        .btn-submit { background: var(--primary); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; width: 100%; transition: background 0.2s; }
+        .btn-submit:hover { background: var(--primary-hover); }
+
+        /* Sekcja filtrów */
+        .filter-container {
+            background: #f1f5f9; padding: 16px 20px; border-radius: 12px; margin-bottom: 30px; max-width: 600px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--border);
+        }
+        .filter-container label { font-weight: 600; font-size: 0.92rem; color: #334155; }
+        .filter-container select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; min-width: 200px; background: white; }
+
+        /* Siatka kart sal */
+        .rooms-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-top: 20px;
+        }
+        .room-card { 
+            background: var(--surface); padding: 24px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .room-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); }
+        .room-header h3 { font-size: 1.2rem; font-weight: 700; margin: 0 0 8px 0; display: flex; align-items: center; justify-content: space-between; }
+        .tag-city { font-size: 0.75rem; background: #e2e8f0; padding: 4px 10px; border-radius: 20px; color: #4a5568; font-weight: 600; }
+        .room-address { margin: 0 0 16px 0; color: var(--text-muted); font-size: 0.88rem; }
+        .room-capacity { font-size: 0.92rem; margin-bottom: 16px; }
+        .room-amenities { font-size: 0.88rem; color: #475569; background: #f8fafc; padding: 10px 14px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f1f5f9; }
+        
+        .room-actions { display: flex; gap: 10px; align-items: center; margin-top: auto; flex-wrap: wrap; }
+        .btn-view {
+            flex: 1 1 100%; text-align: center; background: var(--primary); color: white; padding: 10px 16px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; margin-bottom: 4px;
+        }
+        .btn-view:hover { background: var(--primary-hover); }
+        
+        .btn-edit-trigger {
+            flex: 1; text-align: center; background: var(--amber); color: white; padding: 10px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-edit-trigger:hover { background: var(--amber-hover); }
+
+        .btn-delete {
+            flex: 1; background: #fee2e2; color: var(--danger); padding: 10px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-delete:hover { background: #fca5a5; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-menu">
+        <div class="nav-links">
+            <a href="/" class="active">🏢 Lista Sal</a>
+            <a href="/profile">👤 Moje Konto</a>
+            <a href="/resources">📦 Biurka i Krzesła</a>
+            <% if (currentUser && currentUser.role === 'admin') { %>
+                <a href="/stats">📊 Statystyki Systemu</a>
+            <% } %>
+        </div>
+        
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+            <div class="user-panel">
+                Zalogowany jako: 👤 <%= currentUser.firstName %> <%= currentUser.lastName %> 
+                (<span class="user-role"><%= currentUser.role.toUpperCase() %></span>)
+                <a href="/auth/logout" class="logout-link">🚪 Wyloguj</a>
+            </div>
+        <% } %>
+    </div>
+
+    <% if (typeof userNotifications !== 'undefined' && userNotifications.length > 0) { %>
+        <div class="notification-box">
+            <h3>⚠️ Ważne komunikaty systemowe:</h3>
+            <ul class="notification-list">
+                <% userNotifications.forEach(notif => { %>
+                    <li>
+                        <%= notif.message %> 
+                        <small>(<%= new Date(notif.createdAt).toLocaleString('pl-PL') %>)</small>
+                    </li>
+                <% }) %>
+            </ul>
+            <form action="/notifications/read" method="POST">
+                <button type="submit" class="btn-hide-notif">Rozumiem, ukryj te komunikaty</button>
+            </form>
+        </div>
+    <% } %>
+
+    <h1>🏢 System rezerwacji DeskZone</h1>
+    <p style="color: var(--text-muted); margin: 0 0 35px 0; font-size: 0.98rem;">Kompleksowe zarządzanie przestrzeniami biurowymi i salami spotkań konferencyjnych.</p>
+    
+    <% if (currentUser && currentUser.role === 'admin') { %>
+        <div class="box">
+            <h2>Dodaj nową salę (Panel Admina)</h2>
+            <form action="/" method="POST">
+                <div class="form-group">
+                    <label for="name">Nazwa sali:</label>
+                    <input type="text" id="name" name="name" placeholder="np. Diamentowa" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">Miasto:</label>
+                    <input type="text" id="city" name="city" placeholder="np. Poznań" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Dokładny adres budynku:</label>
+                    <input type="text" id="address" name="address" placeholder="np. ul. Towarowa 14" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Lokalizacja wewnątrz budynku:</label>
+                    <input type="text" id="location" name="location" placeholder="np. Piętro 2, pokój 204" required>
+                </div>
+                <div class="form-group">
+                    <label for="capacity">Pojemność (miejsca):</label>
+                    <input type="number" id="capacity" name="capacity" min="1" required>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" name="hasProjector"> Posiada projektor</label>
+                    <label class="checkbox-label"><input type="checkbox" name="hasAirConditioning"> Posiada klimatyzację</label>
+                    <label class="checkbox-label"><input type="checkbox" name="hasWhiteboard"> Posiada tablicę (Whiteboard)</label>
+                </div>
+                
+                <button type="submit" class="btn-submit">Dodaj salę</button>
+            </form>
+        </div>
+    <% } %>
+
+    <h2>Dostępne sale konferencyjne</h2>
+
+    <div class="filter-container">
+        <label for="cityFilter">📍 Filtruj po mieście:</label>
+        <select id="cityFilter" onchange="location.href = this.value ? '/?city=' + encodeURIComponent(this.value) : '/';">
+            <option value="">-- Wszystkie miasta --</option>
+            <% cities.forEach(city => { %>
+                <option value="<%= city %>" <%= selectedCity === city ? 'selected' : '' %>><%= city %></option>
+            <% }) %>
+        </select>
+    </div>
+
+    <% if (rooms.length === 0) { %>
+        <p style="color: var(--text-muted); font-style: italic;">Brak sal spełniających kryteria wyszukiwania w wybranym mieście.</p>
+    <% } else { %>
+        <div class="rooms-grid">
+            <% rooms.forEach(room => { %>
+                <div class="room-card">
+                    <div>
+                        <div class="room-header">
+                            <h3>🚪 <%= room.name %> <span class="tag-city">📍 <%= room.city %></span></h3>
+                        </div>
+                        <p class="room-address"><strong>Adres:</strong> <%= room.address %> (<%= room.location %>)</p>
+                        <div class="room-capacity">👥 Pojemność: <strong><%= room.capacity %> osób</strong></div>
+                        <div class="room-amenities">
+                            Projektor: <%= room.hasProjector ? '✅' : '❌' %> | 
+                            Klimatyzacja: <%= room.hasAirConditioning ? '✅' : '❌' %> | 
+                            Tablica: <%= room.hasWhiteboard ? '✅' : '❌' %>
+                        </div>
+                    </div>
+                    
+                    <div class="room-actions">
+                        <a href="/rooms/<%= room.id %>/reservations" class="btn-view">Zobacz rezerwacje</a>
+
+                        <% if (currentUser && currentUser.role === 'admin') { %>
+                            <button type="button" class="btn-edit-trigger" 
+                                    onclick="openEditModal('<%= room.id %>', '<%= room.name %>', '<%= room.city %>', '<%= room.address %>', '<%= room.location %>', '<%= room.capacity %>', <%= room.hasProjector %>, <%= room.hasAirConditioning %>, <%= room.hasWhiteboard %>)">
+                                Edytuj
+                            </button>
+
+                            <form action="/rooms/<%= room.id %>/delete" method="POST" style="margin: 0; flex: 1;" onsubmit="return confirm('⚠️ UWAGA! Usunięcie sali spowoduje bezpowrotne skasowanie wszystkich przypisanych do niej rezerwacji. Czy na pewno chcesz to zrobić?');">
+                                <button type="submit" class="btn-delete" style="width: 100%;">Usuń</button>
+                            </form>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+
+    <% if (currentUser && currentUser.role === 'admin') { %>
+        <div id="editRoomModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div class="box" style="width: 90%; max-width: 500px; margin-bottom: 0; max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">✏️ Edytuj Salę</h2>
+                    <button type="button" onclick="closeEditModal()" style="width: auto; background: transparent; color: var(--text-muted); font-size: 1.5rem; padding: 0; border: none; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="editRoomForm" method="POST">
+                    <div class="form-group">
+                        <label for="edit_name">Nazwa sali:</label>
+                        <input type="text" id="edit_name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_city">Miasto:</label>
+                        <input type="text" id="edit_city" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_address">Dokładny adres budynku:</label>
+                        <input type="text" id="edit_address" name="address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_location">Lokalizacja wewnątrz budynku:</label>
+                        <input type="text" id="edit_location" name="location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_capacity">Pojemność (miejsca):</label>
+                        <input type="number" id="edit_capacity" name="capacity" min="1" required>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" id="edit_hasProjector" name="hasProjector"> Posiada projektor</label>
+                        <label class="checkbox-label"><input type="checkbox" id="edit_hasAirConditioning" name="hasAirConditioning"> Posiada klimatyzację</label>
+                        <label class="checkbox-label"><input type="checkbox" id="edit_hasWhiteboard" name="hasWhiteboard"> Posiada tablicę (Whiteboard)</label>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" style="background: var(--amber);">Zapisz zmiany</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function openEditModal(id, name, city, address, location, capacity, projector, ac, whiteboard) {
+                document.getElementById('editRoomForm').action = `/rooms/${id}/edit`;
+                
+                document.getElementById('edit_name').value = name;
+                document.getElementById('edit_city').value = city;
+                document.getElementById('edit_address').value = address;
+                document.getElementById('edit_location').value = location;
+                document.getElementById('edit_capacity').value = capacity;
+                
+                document.getElementById('edit_hasProjector').checked = Boolean(projector);
+                document.getElementById('edit_hasAirConditioning').checked = Boolean(ac);
+                document.getElementById('edit_hasWhiteboard').checked = Boolean(whiteboard);
+                
+                document.getElementById('editRoomModal').style.display = 'flex';
+            }
+
+            function closeEditModal() {
+                document.getElementById('editRoomModal').style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                const modal = document.getElementById('editRoomModal');
+                if (event.target === modal) {
+                    closeEditModal();
+                }
+            }
+        </script>
+    <% } %>
+
+</body>
+</html>

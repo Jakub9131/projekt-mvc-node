@@ -1,0 +1,20 @@
+// routes/authRoutes.js
+const { isAuthenticated, isAdmin } = require('../middleware/auth');
+const express = require('express');
+const router = express.Router();
+const authController = require('../controllers/authController');
+
+// Strona logowania / rejestracji (GET)
+router.get('/auth', authController.getAuthPage);
+
+// Obs³uga formularzy (POST)
+router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
+router.get('/auth/logout', authController.logout);
+router.get('/profile', isAuthenticated, authController.getProfilePage);
+router.post('/profile/create-user', isAuthenticated, isAdmin, authController.createUserByAdmin);
+router.post('/notifications/read', isAuthenticated, authController.markNotificationsAsRead);
+router.post('/profile/users/:userId/edit', authController.updateUserByAdmin);
+router.post('/profile/users/:userId/delete', authController.deleteUserByAdmin);
+
+module.exports = router;

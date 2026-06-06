@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeskZone - Moje Konto</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #b45309;
+            --warning-bg: #fef3c7;
+            --warning-border: #fde68a;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --amber: #d97706;
+            --amber-hover: #b45309;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background-color: var(--background); 
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        h1 { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-top: 30px; margin-bottom: 15px; }
+        h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-top: 0; margin-bottom: 15px; }
+        
+        /* Menu Nawigacyjne */
+        .nav-menu { 
+            background: var(--surface); 
+            padding: 0 24px; 
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            margin-bottom: 35px; 
+            border: 1px solid var(--border);
+        }
+        .nav-links { display: flex; align-items: center; }
+        .nav-menu a { 
+            margin-right: 24px; 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+            padding: 20px 0;
+            position: relative;
+        }
+        .nav-menu a:hover { color: var(--primary); }
+        .nav-menu a.active { 
+            color: var(--primary); 
+            font-weight: 600;
+        }
+        .nav-menu a.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0;
+        }
+        .user-panel { font-size: 0.9rem; font-weight: 600; }
+        .logout-link { color: var(--danger); text-decoration: none; margin-left: 12px; font-weight: 700; }
+        .logout-link:hover { color: var(--danger-hover); }
+
+        /* Konteners informacyjne i formularze */
+        .box { 
+            background: var(--surface); 
+            padding: 28px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+            max-width: 500px; 
+            border: 1px solid var(--border);
+        }
+        
+        .box p { margin: 12px 0; font-size: 0.95rem; display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+        .box p:last-of-type { border-bottom: none; padding-bottom: 0; }
+        .box p strong { color: var(--text-muted); font-weight: 500; }
+
+        /* Grupy pól formularza */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select { 
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; background-color: #fff; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        
+        button { background: var(--success); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; width: 100%; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+
+        /* Stylowanie tabel danych */
+        .table-container {
+            background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; max-width: 850px;
+        }
+        table { width: 100%; border-collapse: collapse; background: transparent; }
+        th, td { padding: 16px 20px; text-align: left; font-size: 0.92rem; }
+        th { background-color: #f8fafc; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+        td { border-bottom: 1px solid var(--border); color: var(--text-main); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+
+        .btn-cancel {
+            background: #fee2e2; color: var(--danger); padding: 6px 12px; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; width: auto;
+        }
+        .btn-cancel:hover { background: #fca5a5; }
+
+        .btn-edit {
+            background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border: 1px solid var(--warning-border); border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-edit:hover { background: #fde68a; }
+
+        .badge-role { padding: 4px 10px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.02em; }
+        
+        hr { margin: 40px 0; border: 0; border-top: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-menu">
+        <div class="nav-links">
+            <a href="/">🏢 Lista Sal</a>
+            <a href="/profile" class="active">👤 Moje Konto</a>
+            <a href="/resources">📦 Biurka i Krzesła</a>
+            <% if (currentUser && currentUser.role === 'admin') { %>
+                <a href="/stats">📊 Statystyki Systemu</a>
+            <% } %>
+        </div>
+        
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+            <div class="user-panel">
+                Zalogowany jako: 👤 <%= currentUser.firstName %> <%= currentUser.lastName %> 
+                <a href="/auth/logout" class="logout-link">🚪 Wyloguj</a>
+            </div>
+        <% } %>
+    </div>
+
+    <h1>👤 Profil użytkownika</h1>
+    <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+    <div style="background-color: #fee2e2; color: #ef4444; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; margin-bottom: 25px; border: 1px solid #fca5a5; max-width: 550px;">
+        <%= errorMessage %>
+    </div>
+    <% } %>
+    <p style="color: var(--text-muted); margin: 0 0 30px 0; font-size: 0.95rem;">Przeglądaj swoje poświadczenia i monitoruj historię operacji w systemie.</p>
+    
+    <div class="box">
+        <h3>Twoje dane osobowe</h3>
+        <p><strong>Imię i Nazwisko</strong> <span><%= user.firstName %> <%= user.lastName %></span></p>
+        <p><strong>Adres E-mail</strong> <span><%= user.email %></span></p>
+        <p><strong>Rola w systemie</strong> <span style="text-transform: uppercase; color: var(--primary); font-weight: 700; font-size: 0.85rem;"><%= user.role %></span></p>
+    </div>
+
+    <% if (currentUser && currentUser.role === 'user') { %>
+        <div style="margin-top: 35px;">
+            <h2>📅 Twoje rezerwacje sal</h2>
+            
+            <% if (typeof userReservations !== 'undefined' && userReservations.length > 0) { %>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sala</th>
+                                <th>Cel / Spotkanie</th>
+                                <th>Od</th>
+                                <th>Do</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% userReservations.forEach(res => { %>
+                                <tr>
+                                    <td><strong>🚪 <%= res.Room ? res.Room.name : 'Nieznana sala' %></strong></td>
+                                    <td><%= res.title %></td>
+                                    <td><%= new Date(res.startTime).toLocaleString('pl-PL') %></td>
+                                    <td><%= new Date(res.endTime).toLocaleString('pl-PL') %></td>
+                                    <td>
+                                        <form action="/reservations/<%= res.id %>/cancel" method="POST" style="margin: 0;" onsubmit="return confirm('Czy na pewno chcesz anulować tę rezerwację?');">
+                                            <button type="submit" class="btn-cancel">Anuluj</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p style="color: var(--text-muted); font-style: italic; margin-top: 15px;">Nie masz obecnie żadnych zaplanowanych rezerwacji.</p>
+            <% } %>
+        </div>
+    <% } %>
+
+    <% if (currentUser && currentUser.role === 'admin') { %>
+        <hr>
+        
+        <div style="margin-top: 20px;">
+            <h2>👥 Panel zarządzania użytkownikami (Admin)</h2>
+            
+            <div class="box" style="max-width: 550px; margin-top: 20px;">
+                <h3>Utwórz nowe konto użytkownika</h3>
+                <form action="/profile/create-user" method="POST">
+                    <div class="form-group">
+                        <label for="firstName">Imię:</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Nazwisko:</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Adres E-mail:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Hasło startowe:</label>
+                        <input type="password" id="password" name="password" required placeholder="Min. 6 znaków">
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Rola:</label>
+                        <select id="role" name="role">
+                            <option value="user" selected>Zwykły pracownik (User)</option>
+                            <option value="admin">Administrator (Admin)</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="background: var(--primary);">Zarejestruj konto</button>
+                </form>
+            </div>
+
+            <h3 style="margin-top: 35px; margin-bottom: 5px;">Lista kont zarejestrowanych w systemie:</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imię i nazwisko</th>
+                            <th>E-mail</th>
+                            <th>Rola</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% allUsers.forEach(u => { %>
+                            <tr>
+                                <td style="color: var(--text-muted); font-size: 0.85rem;">#<%= u.id %></td>
+                                <td style="font-weight: 500;">👤 <%= u.firstName %> <%= u.lastName %></td>
+                                <td><%= u.email %></td>
+                                <td>
+                                    <% if (u.role === 'admin') { %>
+                                        <span class="badge-role" style="background: #fee2e2; color: var(--danger);">ADMIN</span>
+                                    <% } else { %>
+                                        <span class="badge-role" style="background: #d1fae5; color: #059669;">USER</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn-edit" 
+                                                onclick="openEditUserModal('<%= u.id %>', '<%= u.firstName %>', '<%= u.lastName %>', '<%= u.email %>', '<%= u.role %>')">
+                                            Edytuj
+                                        </button>
+                                        
+                                        <% if (u.id !== currentUser.id) { %>
+                                            <form action="/profile/users/<%= u.id %>/delete" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ Czy na pewno chcesz USUNĄĆ to konto? Użytkownik straci dostęp do systemu, a jego rezerwacje zostaną wyczyszczone.');">
+                                                <button type="submit" class="btn-cancel">Usuń</button>
+                                            </form>
+                                        <% } else { %>
+                                            <span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; align-self: center;">(Twoje konto)</span>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="editUserModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div class="box" style="width: 90%; max-width: 450px; margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">✏️ Edytuj Dane Pracownika</h2>
+                    <button type="button" onclick="closeEditUserModal()" style="width: auto; background: transparent; color: var(--text-muted); font-size: 1.5rem; padding: 0; border: none; cursor: pointer;">&times;</button>
+                </div>
+                
+                <form id="editUserForm" method="POST">
+                    <div class="form-group">
+                        <label for="edit_firstName">Imię:</label>
+                        <input type="text" id="edit_firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_lastName">Nazwisko:</label>
+                        <input type="text" id="edit_lastName" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_email">Adres e-mail:</label>
+                        <input type="email" id="edit_email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_role">Uprawnienia systemowe:</label>
+                        <select id="edit_role" name="role" required>
+                            <option value="user">USER (Pracownik)</option>
+                            <option value="admin">ADMIN (Administrator)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" style="background: var(--amber); color: white; font-weight: 600; margin-top: 10px;">Zapisz zmiany</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function openEditUserModal(id, firstName, lastName, email, role) {
+                document.getElementById('editUserForm').action = `/profile/users/${id}/edit`;
+                
+                document.getElementById('edit_firstName').value = firstName;
+                document.getElementById('edit_lastName').value = lastName;
+                document.getElementById('edit_email').value = email;
+                document.getElementById('edit_role').value = role;
+                
+                document.getElementById('editUserModal').style.display = 'flex';
+            }
+
+            function closeEditUserModal() {
+                document.getElementById('editUserModal').style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                const modal = document.getElementById('editUserModal');
+                if (event.target === modal) {
+                    closeEditUserModal();
+                }
+            }
+        </script>
+    <% } %>
+
+</body>
+</html>

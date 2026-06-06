@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeskZone - Biurka i Krzesła</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 40px; 
+            background-color: var(--background); 
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        h1 { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-top: 0; margin-bottom: 20px; }
+        
+        /* Menu Nawigacyjne */
+        .nav-menu { 
+            background: var(--surface); 
+            padding: 0 24px; 
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* POPRAWKA: Rozsuwa elementy na brzegi paska */
+            border-radius: 12px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02); 
+            margin-bottom: 35px; 
+            border: 1px solid var(--border);
+        }
+        
+        /* POPRAWKA: Grupuje linki po lewej stronie */
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-menu a { 
+            margin-right: 24px; 
+            text-decoration: none; 
+            color: var(--text-muted); 
+            font-weight: 500; 
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+            padding: 20px 0;
+            position: relative;
+        }
+        .nav-menu a:hover { color: var(--primary); }
+        .nav-menu a.active { 
+            color: var(--primary); 
+            font-weight: 600;
+        }
+        .nav-menu a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Panel użytkownika po prawej stronie */
+        .user-panel {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .logout-link {
+            color: var(--danger) !important;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .logout-link:hover {
+            opacity: 0.8;
+        }
+
+        /* Główny kontener na formularz */
+        .box { 
+            background: var(--surface); 
+            padding: 28px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+            margin-bottom: 40px; 
+            max-width: 500px; 
+            border: 1px solid var(--border);
+        }
+
+        /* Grupy formularza */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; color: var(--text-main); }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 0.95rem;
+            background-color: #fff;
+            color: var(--text-main);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Przyciski */
+        button { 
+            background: var(--primary); 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+        }
+        button:hover { background: var(--primary-hover); }
+        button:active { transform: scale(0.98); }
+
+        /* Sekcja rejestru i tabeli */
+        .table-container {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; background: transparent; }
+        th, td { padding: 16px 20px; text-align: left; font-size: 0.92rem; }
+        th { 
+            background-color: #f8fafc; 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            font-size: 0.75rem; 
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+        td { border-bottom: 1px solid var(--border); color: var(--text-main); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+
+        /* Odznaki statusów (Badges) */
+        .status-badge { 
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.02em;
+        }
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-approved { background-color: #d1fae5; color: #059669; }
+        
+        .tag-location {
+            background: #f1f5f9; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 0.85rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* Mini-formularz admina w tabeli */
+        .admin-action-form select {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+        }
+        .admin-action-form button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-menu">
+        <div class="nav-links">
+            <a href="/">🏢 Lista Sal</a>
+            <a href="/profile">👤 Moje Konto</a>
+            <a href="/resources" class="active">📦 Biurka i Krzesła</a>
+            <% if (currentUser && currentUser.role === 'admin') { %>
+                <a href="/stats">📊 Statystyki Systemu</a>
+            <% } %>
+        </div>
+        
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+            <div class="user-panel">
+                Zalogowany jako: 👤 <%= currentUser.firstName %> <%= currentUser.lastName %> 
+                (<span style="color: var(--primary); font-weight: 600;"><%= currentUser.role.toUpperCase() %></span>)
+                <a href="/auth/logout" class="logout-link">🚪 Wyloguj</a>
+            </div>
+        <% } %>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <h1>📦 Zamówienia wyposażenia</h1>
+        <p style="color: var(--text-muted); margin: 0; font-size: 0.95rem;">Zarządzaj hurtowym zapotrzebowaniem na sprzęt i weryfikuj statusy dostaw rejonowych.</p>
+    </div>
+
+    <% if (currentUser && currentUser.role === 'user') { %>
+        <div class="box">
+            <h2>Złóż zapotrzebowanie na sprzęt</h2>
+            <form action="/resources/order" method="POST">
+                <div class="form-group">
+                    <label for="resourceType">Wybierz zasób:</label>
+                    <select id="resourceType" name="resourceType" required>
+                        <option value="biurko">🖥️ Ergonomiczne Biurko</option>
+                        <option value="krzeslo">🪑 Krzesło Biurowe (Regulowane)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Ilość sztuk (hurt: 10 - 25):</label>
+                    <input type="number" id="quantity" name="quantity" min="10" max="25" value="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="province">Województwo docelowe:</label>
+                    <select id="province" name="province" required>
+                        <option value="">-- Wybierz województwo --</option>
+                        <% provinces.forEach(p => { %>
+                            <option value="<%= p %>"><%= p %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="city">Miasto:</label>
+                    <input type="text" id="city" name="city" placeholder="np. Poznań" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Ulica i nr (budynku/pokoju):</label>
+                    <input type="text" id="street" name="street" placeholder="np. ul. Towarowa 12, pokój 4" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryDate">Preferowana data dostawy:</label>
+                    <input type="date" id="deliveryDate" name="deliveryDate" required>
+                </div>
+
+                <button type="submit">Wyślij zapotrzebowanie</button>
+            </form>
+        </div>
+    <% } %>
+
+    <h2 style="margin-top: 10px; margin-bottom: 15px;">📋 Rejestr zapotrzebowań</h2>
+    
+    <% if (orders.length === 0) { %>
+        <p style="color: var(--text-muted); font-style: italic;">Brak zgłoszonych zamówień w systemie.</p>
+    <% } else { %>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <% if (currentUser && currentUser.role === 'admin') { %>
+                            <th>Pracownik</th>
+                        <% } %>
+                        <th>Zasób</th>
+                        <th>Ilość</th>
+                        <th>Adres dostawy</th>
+                        <th>Województwo</th>
+                        <th>Data dostawy</th> 
+                        <th>Status</th>
+                        <th>Przypisany Kurier</th>
+                        <% if (currentUser && currentUser.role === 'admin') { %>
+                            <th>Zarządzanie rejonem (Admin)</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <% if (currentUser && currentUser.role === 'admin') { %>
+                                <td style="font-weight: 500;">👤 <%= order.User ? order.User.firstName + ' ' + order.User.lastName : 'Nieznany' %></td>
+                            <% } %>
+                            <td style="text-transform: capitalize;">
+                                <strong><%= order.resourceType === 'krzeslo' ? '🪑 Krzesło' : '🖥️ Biurko' %></strong>
+                            </td>
+                            <td style="font-weight: 600; color: var(--primary);"><%= order.quantity %> szt.</td>
+                            <td><%= order.street %>, <%= order.city %></td>
+                            <td><span class="tag-location">📍 <%= order.province %></span></td>
+                            <td style="font-weight: 500;"><%= new Date(order.deliveryDate).toLocaleDateString('pl-PL') %></td>
+                            <td>
+                                <% if (order.status === 'oczekujace') { %>
+                                    <span class="status-badge status-pending">Oczekujące</span>
+                                <% } else { %>
+                                    <span class="status-badge status-approved">Zaakceptowane</span>
+                                <% } %>
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.88rem;">
+                                <%= order.courierName ? '🚚 ' + order.courierName : '⏳ Oczekiwanie na strefę' %>
+                            </td>
+                            
+                            <% if (currentUser && currentUser.role === 'admin') { %>
+                                <td>
+                                    <% if (order.status === 'oczekujace') { %>
+                                        <form action="/resources/<%= order.id %>/approve" method="POST" class="admin-action-form" style="display: flex; gap: 8px; margin: 0;">
+                                            <select name="courierName" required>
+                                                <option value="">-- Dobierz kuriera --</option>
+                                                <% if (order.matchingCouriers && order.matchingCouriers.length > 0) { %>
+                                                    <% order.matchingCouriers.forEach(courier => { %>
+                                                        <option value="<%= courier.name %>"><%= courier.name %></option>
+                                                    <% }) %>
+                                                <% } else { %>
+                                                    <option value="Kurier Zewnętrzny (Domyślny)">Kurier Zewnętrzny (Domyślny)</option>
+                                                <% } %>
+                                            </select>
+                                            <button type="submit">Zatwierdź</button>
+                                        </form>
+                                    <% } else { %>
+                                        <span style="color: var(--success); font-weight: 600; font-size: 0.85rem;">✔️ Przekazano</span>
+                                    <% } %>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+
+</body>
+</html>
