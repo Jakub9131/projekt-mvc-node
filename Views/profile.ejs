@@ -158,6 +158,25 @@
         <p><strong>Adres E-mail</strong> <span><%= user.email %></span></p>
         <p><strong>Rola w systemie</strong> <span style="text-transform: uppercase; color: var(--primary); font-weight: 700; font-size: 0.85rem;"><%= user.role %></span></p>
     </div>
+    
+    <div class="box">
+        <h3>🔐 Zmień swoje hasło</h3>
+        <form action="/profile/change-password" method="POST" id="changePasswordForm">
+            <div class="form-group">
+                <label for="currentPassword">Aktualne hasło:</label>
+                <input type="password" id="currentPassword" name="currentPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="newPassword">Nowe hasło:</label>
+                <input type="password" id="newPassword" name="newPassword" minlength="8" pattern="(?=.*\d)(?=.*[A-Z]).{8,}" title="Hasło musi składać się z przynajmniej 8 znaków, zawierać minimum jedną wielką literę oraz jedną cyfrę." required>
+            </div>
+            <div class="form-group">
+                <label for="confirmNewPassword">Powtórz nowe hasło:</label>
+                <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+            </div>
+            <button type="submit" style="background: var(--primary);">Zaktualizuj moje hasło</button>
+        </form>
+    </div>
 
     <% if (currentUser && currentUser.role === 'user') { %>
         <div style="margin-top: 35px;">
@@ -266,6 +285,11 @@
                                             Edytuj
                                         </button>
                                         
+                                        <button type="button" class="btn-edit" style="background: #e0e7ff; color: var(--primary); border-color: #c7d2fe;"
+                                                onclick="openResetPasswordModal('<%= u.id %>', '<%= u.firstName %> <%= u.lastName %>')">
+                                            Resetuj hasło
+                                        </button>
+                                        
                                         <% if (u.id !== currentUser.id) { %>
                                             <form action="/profile/users/<%= u.id %>/delete" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ Czy na pewno chcesz USUNĄĆ to konto? Użytkownik straci dostęp do systemu, a jego rezerwacje zostaną wyczyszczone.');">
                                                 <button type="submit" class="btn-cancel">Usuń</button>
@@ -315,7 +339,38 @@
             </div>
         </div>
 
+        <div id="resetPasswordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px);">
+            <div class="box" style="width: 90%; max-width: 400px; margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; font-size: 1.2rem;">🔑 Resetuj Hasło Pracownika</h2>
+                    <button type="button" onclick="closeResetPasswordModal()" style="width: auto; background: transparent; color: var(--text-muted); font-size: 1.5rem; padding: 0; border: none; cursor: pointer;">&times;</button>
+                </div>
+                
+                <p style="font-size: 0.9rem; color: var(--text-muted); border: none; padding: 0; display: block;">
+                    Generujesz nowe hasło dla użytkownika: <strong id="reset_user_name" style="color: var(--text-main);"></strong>
+                </p>
+                
+                <form id="resetPasswordForm" method="POST" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label for="reset_newPassword">Nowe hasło dla pracownika:</label>
+                        <input type="password" id="reset_newPassword" name="newPassword" minlength="8" required placeholder="Min. 8 znaków, cyfra, wielka litera">
+                    </div>
+                    <button type="submit" style="background: var(--primary); color: white; font-weight: 600;">Wymuś zmianę hasła</button>
+                </form>
+            </div>
+        </div>
+
         <script>
+            // Walidacja zgodności haseł przy własnej zmianie
+            document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
+                const password = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmNewPassword').value;
+                if (password !== confirmPassword) {
+                    event.preventDefault();
+                    alert('🛑 Nowe hasła nie są identyczne!');
+                }
+            });
+
             function openEditUserModal(id, firstName, lastName, email, role) {
                 document.getElementById('editUserForm').action = `/profile/users/${id}/edit`;
                 
@@ -331,10 +386,24 @@
                 document.getElementById('editUserModal').style.display = 'none';
             }
 
+            function openResetPasswordModal(id, fullName) {
+                document.getElementById('resetPasswordForm').action = `/profile/users/${id}/reset-password`;
+                document.getElementById('reset_user_name').innerText = fullName;
+                document.getElementById('resetPasswordModal').style.display = 'flex';
+            }
+
+            function closeResetPasswordModal() {
+                document.getElementById('resetPasswordModal').style.display = 'none';
+            }
+
             window.onclick = function(event) {
-                const modal = document.getElementById('editUserModal');
-                if (event.target === modal) {
+                const editModal = document.getElementById('editUserModal');
+                const resetModal = document.getElementById('resetPasswordModal');
+                if (event.target === editModal) {
                     closeEditUserModal();
+                }
+                if (event.target === resetModal) {
+                    closeResetPasswordModal();
                 }
             }
         </script>

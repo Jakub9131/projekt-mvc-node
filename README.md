@@ -36,5 +36,6 @@ DB_USER='UZYTKOWNIK'
 DB_PASSWORD='HASLO'
 DB_HOST=localhost
 DB_DIALECT=postgres
-4. node run-seed.js (wgranie danych testowych)
-5. npm start
+4. npm run dev (na chwile, tak ¿eby baza danych pobra³a tabele)
+5. node run-seed.js (wgranie danych testowych)
+6. npm start

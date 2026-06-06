@@ -211,7 +211,7 @@ exports.createUserByAdmin = async (req, res) => {
     }
 };
 
-// NOWOŚĆ: Aktualizacja danych pracownika przez Admina
+// Aktualizacja danych pracownika przez Admina
 exports.updateUserByAdmin = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -230,7 +230,6 @@ exports.updateUserByAdmin = async (req, res) => {
         if (email !== userToUpdate.email) {
             const emailCheck = await User.findOne({ where: { email } });
             if (emailCheck) {
-                // Generowanie błędu przekazywanego w query parametrze dla zachowania spójności
                 return res.redirect(`/profile?error=${encodeURIComponent('🛑 Podany adres e-mail jest już zajęty przez innego pracownika.')}`);
             }
         }
@@ -258,7 +257,7 @@ exports.updateUserByAdmin = async (req, res) => {
     }
 };
 
-// NOWOŚĆ: Usuwanie konta użytkownika przez Admina
+// Usuwanie konto użytkownika przez Admina
 exports.deleteUserByAdmin = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -283,6 +282,75 @@ exports.deleteUserByAdmin = async (req, res) => {
     } catch (error) {
         console.error('Błąd podczas usuwania użytkownika:', error);
         res.status(500).render('error', { errorMessage: 'Nie udało się usunąć użytkownika z systemu.' });
+    }
+};
+
+// NOWOŚĆ: Zmiana własnego hasła przez zalogowanego użytkownika (User/Admin)
+exports.changePassword = async (req, res) => {
+    try {
+        const currentUserId = req.session.user.id;
+        const { currentPassword, newPassword } = req.body;
+
+        const user = await User.findByPk(currentUserId);
+        if (!user) {
+            return res.status(404).render('error', { errorMessage: 'Nie znaleziono takiego użytkownika.' });
+        }
+
+        // Weryfikacja poprawności dotychczasowego hasła
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.redirect(`/profile?error=${encodeURIComponent('🛑 Podane aktualne hasło jest nieprawidłowe.')}`);
+        }
+
+        // Walidacja siły nowego hasła (Min. 8 znaków, 1 wielka litera, 1 cyfra)
+        const passwordRegex = /(?=.*\d)(?=.*[A-Z]).{8,}/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.redirect(`/profile?error=${encodeURIComponent('🛑 Nowe hasło nie spełnia kryteriów bezpieczeństwa (min. 8 znaków, wielka litera, cyfra).')}`);
+        }
+
+        // Szyfrowanie nowego hasła i zapis w bazie
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await user.update({ password: hashedNewPassword });
+
+        console.log(`[SYSTEM] Użytkownik ID: ${currentUserId} zmienił swoje hasło.`);
+        res.redirect(`/profile?error=${encodeURIComponent('✅ Hasło zostało pomyślnie zmienione!')}`);
+    } catch (error) {
+        console.error('Błąd podczas zmiany hasła:', error);
+        res.status(500).render('error', { errorMessage: 'Wystąpił błąd serwera podczas aktualizacji hasła.' });
+    }
+};
+
+// NOWOŚĆ: Resetowanie hasła użytkownika przez Administratora
+exports.resetPasswordByAdmin = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { newPassword } = req.body;
+
+        console.log(`[SYSTEM] Administrator inicjuje reset hasła użytkownika ID: ${userId}`);
+
+        const userToReset = await User.findByPk(userId);
+        if (!userToReset) {
+            return res.status(404).render('error', { errorMessage: 'Nie znaleziono wskazanego pracownika.' });
+        }
+
+        if (!newPassword || newPassword.length < 8) {
+            return res.redirect(`/profile?error=${encodeURIComponent('🛑 Nowe hasło musi składać się z minimum 8 znaków.')}`);
+        }
+
+        // Zmiana i hashowanie hasła bez pytania o stare poświadczenia
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await userToReset.update({ password: hashedPassword });
+
+        // Wysłanie komunikatu do systemu powiadomień pracownika
+        await Notification.create({
+            userId: userToReset.id,
+            message: `🔒 Twoje hasło dostępowe do konta zostało zresetowane i zmienione przez Administratora systemu.`
+        });
+
+        res.redirect(`/profile?error=${encodeURIComponent(`✅ Pomyślnie zresetowano hasło dla: ${userToReset.firstName} ${userToReset.lastName}`)}`);
+    } catch (error) {
+        console.error('Błąd podczas resetowania hasła pracownika:', error);
+        res.status(500).render('error', { errorMessage: 'Wystąpił błąd serwera podczas wymuszonej zmiany hasła.' });
     }
 };
 

@@ -16,5 +16,7 @@ router.post('/profile/create-user', isAuthenticated, isAdmin, authController.cre
 router.post('/notifications/read', isAuthenticated, authController.markNotificationsAsRead);
 router.post('/profile/users/:userId/edit', authController.updateUserByAdmin);
 router.post('/profile/users/:userId/delete', authController.deleteUserByAdmin);
+router.post('/profile/change-password', authController.changePassword);
+router.post('/profile/users/:userId/reset-password', authController.resetPasswordByAdmin);
 
 module.exports = router;
