@@ -1,10 +1,8 @@
-// models/Room.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Sequelize = require('sequelize');
 
 const Room = sequelize.define('Room', {
-    // Sequelize automatycznie doda pole id jako klucz g³ówny
     name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -20,12 +18,12 @@ const Room = sequelize.define('Room', {
             min: { args: [1], msg: "Sala musi pomieœciæ przynajmniej 1 osobê." }
         }
     },
-    city: { // NOWOŒÆ: Kolumna na miasto
+    city: {
         type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: 'Warszawa' // wartoœæ domyœlna dla starych rekordów
+        defaultValue: 'Warszawa'
     },
-    address: { // NOWOŒÆ: Dok³adny adres budynku
+    address: {
         type: Sequelize.STRING,
         allowNull: false,
         defaultValue: 'ul. G³ówna 1'
@@ -50,7 +48,7 @@ const Room = sequelize.define('Room', {
         defaultValue: false
     }
 }, {
-    timestamps: true // Automatycznie doda kolumny createdAt i updatedAt
+    timestamps: true
 });
 
 module.exports = Room;

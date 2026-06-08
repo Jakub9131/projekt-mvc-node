@@ -31,7 +31,6 @@
         h1 { font-size: 2rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
         h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-top: 35px; margin-bottom: 15px; }
         
-        /* Górny panel nawigacyjny / Linki */
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -62,7 +61,6 @@
         .user-panel a { color: var(--danger); text-decoration: none; margin-left: 12px; font-weight: 700; }
         .user-panel a:hover { color: var(--danger-hover); }
 
-        /* Metadane sali */
         .room-info-bar {
             background: #f1f5f9;
             padding: 12px 20px;
@@ -75,7 +73,6 @@
             gap: 20px;
         }
 
-        /* Box formularza rezerwacji */
         .box { 
             background: var(--surface); 
             padding: 28px; 
@@ -96,7 +93,6 @@
         .btn-submit { background: var(--primary); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; width: 100%; transition: background 0.2s; }
         .btn-submit:hover { background: var(--primary-hover); }
 
-        /* Alert błędu walidacji */
         .error-alert {
             background-color: #fee2e2;
             color: #ef4444;
@@ -108,7 +104,6 @@
             border: 1px solid #fca5a5;
         }
 
-        /* Tabela rezerwacji */
         .table-container {
             background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; max-width: 900px;
         }
@@ -296,7 +291,6 @@
         document.getElementById(`delete-form-${resId}`).submit();
     }
 
-    // Dynamiczne blokowanie dat z przeszłości w polach datetime-local
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     const currentDateTimeString = now.toISOString().slice(0, 16);
@@ -304,14 +298,12 @@
     document.getElementById('startTime').min = currentDateTimeString;
     document.getElementById('endTime').min = currentDateTimeString;
 
-    // Obsługa okna modalnego edycji rezerwacji
     function openEditReservationModal(id, title, startTime, endTime, userId) {
         document.getElementById('editReservationForm').action = `/reservations/${id}/edit`;
         
         document.getElementById('edit_title').value = title;
         document.getElementById('edit_targetUserId').value = userId;
         
-        // Pomocnicze parsowanie dat do wymaganego przez HTML formatu (YYYY-MM-DDTHH:mm)
         const formatToDateTimeLocal = (dateString) => {
             const d = new Date(dateString);
             d.setMinutes(d.getMinutes() - d.getTimezoneOffset());

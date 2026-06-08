@@ -1,4 +1,3 @@
-// models/User.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -16,7 +15,7 @@ const User = sequelize.define('User', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true, // Adres e-mail musi byæ unikalny w bazie
+        unique: true,
         validate: {
             isEmail: { msg: "WprowadŸ poprawny adres e-mail." },
             notEmpty: { msg: "E-mail nie mo¿e byæ pusty." }
@@ -25,7 +24,7 @@ const User = sequelize.define('User', {
     role: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 'user', // Ka¿dy nowy u¿ytkownik jest domyœlnie zwyk³ym pracownikiem
+        defaultValue: 'user',
         validate: {
             isIn: {
                 args: [['user', 'admin']],

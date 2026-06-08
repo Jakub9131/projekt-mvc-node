@@ -136,7 +136,6 @@
             text-decoration: underline;
         }
 
-        /* Ukrywanie sekcji z płynnym przenikaniem */
         .auth-section {
             display: none;
             animation: fadeIn 0.3s ease-in-out forwards;
@@ -220,7 +219,6 @@
     </div>
 
     <script>
-        // Funkcja przełączająca widoki formularzy
         function toggleAuthMode(mode) {
             const loginSection = document.getElementById('loginSection');
             const registerSection = document.getElementById('registerSection');
@@ -234,7 +232,6 @@
             }
         }
 
-        // Walidacja zgodności haseł
         document.getElementById('registerForm').addEventListener('submit', function(event) {
             const password = document.getElementById('reg-password').value;
             const confirmPassword = document.getElementById('reg-confirmPassword').value;
@@ -245,7 +242,6 @@
             }
         });
 
-        // INTEGRACJA Z BACKENDEM: Jeśli serwer wypluje błąd rejestracji, automatycznie otwórz panel rejestracji
         <% if (typeof isRegisterError !== 'undefined' && isRegisterError) { %>
             toggleAuthMode('register');
         <% } %>

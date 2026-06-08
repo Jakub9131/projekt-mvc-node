@@ -36,7 +36,6 @@
         h2 { font-size: 1.25rem; font-weight: 600; color: var(--text-main); margin-top: 30px; margin-bottom: 15px; }
         h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-main); margin-top: 0; margin-bottom: 15px; }
         
-        /* Menu Nawigacyjne */
         .nav-menu { 
             background: var(--surface); 
             padding: 0 24px; 
@@ -72,7 +71,6 @@
         .logout-link { color: var(--danger); text-decoration: none; margin-left: 12px; font-weight: 700; }
         .logout-link:hover { color: var(--danger-hover); }
 
-        /* Konteners informacyjne i formularze */
         .box { 
             background: var(--surface); 
             padding: 28px; 
@@ -87,7 +85,6 @@
         .box p:last-of-type { border-bottom: none; padding-bottom: 0; }
         .box p strong { color: var(--text-muted); font-weight: 500; }
 
-        /* Grupy pól formularza */
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
         .form-group input, .form-group select { 
@@ -98,7 +95,6 @@
         button { background: var(--success); color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; width: 100%; transition: opacity 0.2s; }
         button:hover { opacity: 0.9; }
 
-        /* Stylowanie tabel danych */
         .table-container {
             background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; margin-top: 15px; max-width: 850px;
         }
@@ -253,7 +249,18 @@
                 </form>
             </div>
 
-            <h3 style="margin-top: 35px; margin-bottom: 5px;">Lista kont zarejestrowanych w systemie:</h3>
+            <h3 style="margin-top: 35px; margin-bottom: 15px;">Lista kont zarejestrowanych w systemie:</h3>
+            
+            <div class="box" style="max-width: 850px; margin-bottom: 25px; padding: 20px;">
+                <form onsubmit="event.preventDefault();" style="display: flex; gap: 12px; align-items: center; margin: 0;">
+                    <div class="form-group" style="margin: 0; flex: 1;">
+                        <input type="text" id="searchInput" oninput="doRealTimeSearch()" 
+                               placeholder="🔍 Wpisz imię, nazwisko lub e-mail... Szukaj w czasie rzeczywistym..." 
+                               style="width: 100%; margin: 0;">
+                    </div>
+                </form>
+            </div>
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -265,7 +272,7 @@
                             <th>Akcje</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="usersTableBody">
                         <% allUsers.forEach(u => { %>
                             <tr>
                                 <td style="color: var(--text-muted); font-size: 0.85rem;">#<%= u.id %></td>
@@ -361,7 +368,6 @@
         </div>
 
         <script>
-            // Walidacja zgodności haseł przy własnej zmianie
             document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
                 const password = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmNewPassword').value;
@@ -370,6 +376,66 @@
                     alert('🛑 Nowe hasła nie są identyczne!');
                 }
             });
+
+            async function doRealTimeSearch() {
+                const query = document.getElementById('searchInput').value;
+                const tableBody = document.getElementById('usersTableBody');
+                
+                try {
+                    const response = await fetch(`/profile?search=${encodeURIComponent(query)}`, {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    
+                    if (!response.ok) return;
+                    
+                    const data = await response.json();
+                    const users = data.allUsers;
+                    const adminId = data.currentAdminId;
+                    
+                    tableBody.innerHTML = '';
+                    
+                    if (users.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); font-style: italic; padding: 20px;">
+                                    Brak pracowników spełniających kryteria wyszukiwania.
+                                </td>
+                            </tr>`;
+                        return;
+                    }
+                    
+                    users.forEach(u => {
+                        const badge = u.role === 'admin' 
+                            ? `<span class="badge-role" style="background: #fee2e2; color: var(--danger);">ADMIN</span>`
+                            : `<span class="badge-role" style="background: #d1fae5; color: #059669;">USER</span>`;
+                            
+                        const deleteAction = u.id !== adminId
+                            ? `<form action="/profile/users/${u.id}/delete" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ Czy na pewno chcesz USUNĄĆ to konto? Użytkownik straci dostęp do systemu, a jego rezerwacje zostaną wyczyszczone.');">
+                                   <button type="submit" class="btn-cancel">Usuń</button>
+                               </form>`
+                            : `<span style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; align-self: center;">(Twoje konto)</span>`;
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">#${u.id}</td>
+                            <td style="font-weight: 500;">👤 ${u.firstName} ${u.lastName}</td>
+                            <td>${u.email}</td>
+                            <td>${badge}</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn-edit" onclick="openEditUserModal('${u.id}', '${u.firstName}', '${u.lastName}', '${u.email}', '${u.role}')">Edytuj</button>
+                                    <button type="button" class="btn-edit" style="background: #e0e7ff; color: var(--primary); border-color: #c7d2fe;" onclick="openResetPasswordModal('${u.id}', '${u.firstName} ${u.lastName}')">Resetuj hasło</button>
+                                    ${deleteAction}
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                    
+                } catch (err) {
+                    console.error('Błąd pobierania danych wyszukiwania:', err);
+                }
+            }
 
             function openEditUserModal(id, firstName, lastName, email, role) {
                 document.getElementById('editUserForm').action = `/profile/users/${id}/edit`;

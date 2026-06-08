@@ -3,12 +3,10 @@ const bcrypt = require('bcrypt');
 
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        // 1. GENEROWANIE BEZPIECZNYCH HASZY DLA HASE£ STARTOWYCH
         const saltRounds = 10;
         const passwordUser = await bcrypt.hash('User123!', saltRounds);
         const passwordAdmin = await bcrypt.hash('Admin123!', saltRounds);
 
-        // 2. ZASILANIE TABELI USERS (U¿ytkownicy)
         await queryInterface.bulkInsert('Users', [
             {
                 firstName: 'Tomasz',
@@ -57,11 +55,9 @@ module.exports = {
             }
         ], {});
 
-        // Pobieramy ID wstawionych u¿ytkowników, ¿eby powi¹zaæ je z rezerwacjami
         const [users] = await queryInterface.sequelize.query(`SELECT id, email FROM "Users";`);
         const getUserMap = (email) => users.find(u => u.email === email).id;
 
-        // 3. ZASILANIE TABELI ROOMS (Sale Konferencyjne)
         await queryInterface.bulkInsert('Rooms', [
             {
                 name: 'Diamentowa',
@@ -125,16 +121,13 @@ module.exports = {
             }
         ], {});
 
-        // Pobieramy ID wstawionych sal, ¿eby przypisaæ do nich rezerwacje
         const [rooms] = await queryInterface.sequelize.query(`SELECT id, name FROM "Rooms";`);
         const getRoomMap = (name) => rooms.find(r => r.name === name).id;
 
-        // Wyliczanie dat na dzisiaj i jutro, ¿eby rezerwacje nie by³y w przesz³oœci
         const today = new Date();
         const tomorrow = new Date();
         tomorrow.setDate(today.getDate() + 1);
 
-        // 4. ZASILANIE TABELI RESERVATIONS (Rezerwacje zró¿nicowane pod statystyki TOP 5)
         await queryInterface.bulkInsert('Reservations', [
             {
                 title: 'Sprint Planning - Team Alpha',
@@ -150,7 +143,7 @@ module.exports = {
                 startTime: new Date(today.setHours(12, 0, 0, 0)),
                 endTime: new Date(today.setHours(13, 0, 0, 0)),
                 roomId: getRoomMap('Kameralna'),
-                userId: getUserMap('jan.kowalski@deskzone.pl'), // Jan ma ju¿ 2 rezerwacje
+                userId: getUserMap('jan.kowalski@deskzone.pl'), 
                 createdAt: new Date(),
                 updatedAt: new Date()
             },
@@ -185,7 +178,6 @@ module.exports = {
     },
 
     down: async (queryInterface, Sequelize) => {
-        // Czyszczenie bazy w odwróconej kolejnoœci (klucze obce)
         await queryInterface.bulkDelete('Reservations', null, {});
         await queryInterface.bulkDelete('Rooms', null, {});
         await queryInterface.bulkDelete('Users', null, {});

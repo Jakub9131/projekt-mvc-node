@@ -1,10 +1,8 @@
-// routes/reservationRoutes.js
 const express = require('express');
 const router = express.Router();
 const reservationController = require('../controllers/reservationController');
-const { isAdmin, isAuthenticated } = require('../middleware/auth'); // Import obu stra¿ników
+const { isAdmin, isAuthenticated } = require('../middleware/auth');
 
-// Wszystkie operacje na rezerwacjach wymagaj¹ zalogowania
 router.get('/rooms/:roomId/reservations', isAuthenticated, reservationController.getRoomReservations);
 router.post('/rooms/:roomId/reserve', isAuthenticated, reservationController.createReservation);
 router.post('/reservations/:reservationId/delete', isAuthenticated, isAdmin, reservationController.deleteReservation);

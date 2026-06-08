@@ -1,11 +1,10 @@
-// controllers/authController.js
 const bcrypt = require('bcrypt');
+const { Op } = require('sequelize');
 const User = require('../models/User');
 const Reservation = require('../models/Reservation');
 const Room = require('../models/Room');
 const Notification = require('../models/Notification');
 
-// Wyświetlanie strony logowania i rejestracji
 exports.getAuthPage = (req, res) => {
     if (req.session.user) {
         return res.redirect('/');
@@ -13,12 +12,11 @@ exports.getAuthPage = (req, res) => {
     res.render('auth');
 };
 
-// Obsługa rejestracji nowego użytkownika
+// Rejestracja nowego użytkownika
 exports.register = async (req, res) => {
     try {
         let { firstName, lastName, email, password, confirmPassword } = req.body;
 
-        // 1. Walidacja i czyszczenie spacji (Sanitazyzacja danych)
         firstName = firstName ? firstName.trim() : '';
         lastName = lastName ? lastName.trim() : '';
         email = email ? email.trim().toLowerCase() : '';
@@ -30,7 +28,6 @@ exports.register = async (req, res) => {
             });
         }
 
-        // 2. Walidacja tożsamości haseł na backendzie
         if (password !== confirmPassword) {
             return res.status(400).render('auth', {
                 errorMessage: 'Podane hasła nie są identyczne.',
@@ -38,7 +35,6 @@ exports.register = async (req, res) => {
             });
         }
 
-        // 3. Walidacja siły hasła na backendzie (Min. 8 znaków, 1 wielka litera, 1 cyfra)
         const passwordRegex = /(?=.*\d)(?=.*[A-Z]).{8,}/;
         if (!passwordRegex.test(password)) {
             return res.status(400).render('auth', {
@@ -47,7 +43,6 @@ exports.register = async (req, res) => {
             });
         }
 
-        // 4. Sprawdzamy, czy użytkownik o takim mailu już istnieje
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return res.status(400).render('auth', {
@@ -56,10 +51,8 @@ exports.register = async (req, res) => {
             });
         }
 
-        // Hashujemy hasło przed zapisem do bazy
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Tworzymy użytkownika w bazie (domyślnie z rolą 'user')
         await User.create({
             firstName,
             lastName,
@@ -68,7 +61,6 @@ exports.register = async (req, res) => {
             role: 'user'
         });
 
-        // Po udanej rejestracji przekierowujemy na stronę logowania
         res.redirect('/auth');
     } catch (error) {
         console.error(error);
@@ -85,26 +77,22 @@ exports.login = async (req, res) => {
     try {
         let { email, password } = req.body;
 
-        // Czyszczenie danych wejściowych logowania
         email = email ? email.trim().toLowerCase() : '';
 
         if (!email || !password) {
             return res.status(400).render('auth', { errorMessage: 'Wprowadź adres e-mail oraz hasło.' });
         }
 
-        // Szukamy użytkownika w bazie po adresie e-mail
         const user = await User.findOne({ where: { email } });
         if (!user) {
             return res.status(400).render('auth', { errorMessage: 'Nieprawidłowy e-mail lub hasło.' });
         }
 
-        // Porównujemy wpisane hasło z hashem zapisanym w bazie danych
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).render('auth', { errorMessage: 'Nieprawidłowy e-mail lub hasło.' });
         }
 
-        // Zapisujemy dane użytkownika w sesji (oprócz hasła dla bezpieczeństwa)
         req.session.user = {
             id: user.id,
             firstName: user.firstName,
@@ -138,9 +126,34 @@ exports.getProfilePage = async (req, res) => {
         let allUsers = [];
         let userReservations = [];
         const currentUserId = req.session.user.id;
+        const { search } = req.query;
 
         if (req.session.user.role === 'admin') {
-            allUsers = await User.findAll({ order: [['lastName', 'ASC']] });
+            let whereClause = {};
+
+            if (search && search.trim() !== '') {
+                const cleanSearch = search.trim().toLowerCase();
+                const searchTxt = `%${cleanSearch}%`;
+
+                whereClause = {
+                    [Op.or]: [
+                        { firstName: { [Op.iLike]: searchTxt } },
+                        { lastName: { [Op.iLike]: searchTxt } },
+                        { email: { [Op.iLike]: searchTxt } },
+                        { role: { [Op.iLike]: searchTxt } }
+                    ]
+                };
+            }
+
+            allUsers = await User.findAll({
+                where: whereClause,
+                order: [['lastName', 'ASC']]
+            });
+
+            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+                return res.json({ allUsers, currentAdminId: currentUserId });
+            }
+
         } else {
             userReservations = await Reservation.findAll({
                 where: { userId: currentUserId },
@@ -154,7 +167,8 @@ exports.getProfilePage = async (req, res) => {
             allUsers: allUsers,
             userReservations: userReservations,
             currentUser: req.session.user,
-            errorMessage: req.query.error || null // Możliwość przechwycenia komunikatu błędu z URL
+            errorMessage: req.query.error || null,
+            search: search || ''
         });
     } catch (error) {
         console.error('Błąd podczas ładowania profilu:', error);
@@ -171,7 +185,6 @@ exports.createUserByAdmin = async (req, res) => {
         lastName = lastName ? lastName.trim() : '';
         email = email ? email.trim().toLowerCase() : '';
 
-        // Funkcja pomocnicza do przeładowania strony profilu z błędem walidacji
         const reloadProfileWithError = async (msg) => {
             const allUsers = await User.findAll({ order: [['lastName', 'ASC']] });
             return res.status(400).render('profile', {
@@ -183,13 +196,11 @@ exports.createUserByAdmin = async (req, res) => {
             });
         };
 
-        // Sprawdzamy czy mail nie jest zajęty
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return await reloadProfileWithError('🛑 Użytkownik o takim adresie e-mail już istnieje.');
         }
 
-        // Weryfikacja hasła nadawanego przez Admina
         if (!password || password.length < 8) {
             return await reloadProfileWithError('🛑 Hasło pracownika musi mieć przynajmniej 8 znaków.');
         }
@@ -226,7 +237,6 @@ exports.updateUserByAdmin = async (req, res) => {
             return res.status(404).render('error', { errorMessage: 'Nie znaleziono wskazanego użytkownika.' });
         }
 
-        // Sprawdzamy czy nowy e-mail nie jest zajęty przez innego użytkownika
         if (email !== userToUpdate.email) {
             const emailCheck = await User.findOne({ where: { email } });
             if (emailCheck) {
@@ -234,7 +244,6 @@ exports.updateUserByAdmin = async (req, res) => {
             }
         }
 
-        // Aktualizacja rekordu
         await userToUpdate.update({
             firstName,
             lastName,
@@ -242,7 +251,6 @@ exports.updateUserByAdmin = async (req, res) => {
             role: role || 'user'
         });
 
-        // Jeśli admin edytował własne konto, aktualizujemy jego dane w aktywnej sesji
         if (req.session.user.id === parseInt(userId, 10) || req.session.user.id === userId) {
             req.session.user.firstName = firstName;
             req.session.user.lastName = lastName;
@@ -257,7 +265,6 @@ exports.updateUserByAdmin = async (req, res) => {
     }
 };
 
-// Usuwanie konto użytkownika przez Admina
 exports.deleteUserByAdmin = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -273,10 +280,8 @@ exports.deleteUserByAdmin = async (req, res) => {
             return res.status(404).render('error', { errorMessage: 'Nie znaleziono użytkownika o podanym ID.' });
         }
 
-        // Kaskadowe czyszczenie bazy danych (usuwanie rezerwacji pracownika przed kontem)
         await Reservation.destroy({ where: { userId: userId } });
 
-        // Usunięcie konta
         await userToDelete.destroy();
         res.redirect('/profile');
     } catch (error) {
@@ -285,7 +290,7 @@ exports.deleteUserByAdmin = async (req, res) => {
     }
 };
 
-// NOWOŚĆ: Zmiana własnego hasła przez zalogowanego użytkownika (User/Admin)
+//Zmiana własnego hasła przez użytkownika
 exports.changePassword = async (req, res) => {
     try {
         const currentUserId = req.session.user.id;
@@ -296,19 +301,16 @@ exports.changePassword = async (req, res) => {
             return res.status(404).render('error', { errorMessage: 'Nie znaleziono takiego użytkownika.' });
         }
 
-        // Weryfikacja poprawności dotychczasowego hasła
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.redirect(`/profile?error=${encodeURIComponent('🛑 Podane aktualne hasło jest nieprawidłowe.')}`);
         }
 
-        // Walidacja siły nowego hasła (Min. 8 znaków, 1 wielka litera, 1 cyfra)
         const passwordRegex = /(?=.*\d)(?=.*[A-Z]).{8,}/;
         if (!passwordRegex.test(newPassword)) {
             return res.redirect(`/profile?error=${encodeURIComponent('🛑 Nowe hasło nie spełnia kryteriów bezpieczeństwa (min. 8 znaków, wielka litera, cyfra).')}`);
         }
 
-        // Szyfrowanie nowego hasła i zapis w bazie
         const hashedNewPassword = await bcrypt.hash(newPassword, 10);
         await user.update({ password: hashedNewPassword });
 
@@ -320,7 +322,7 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-// NOWOŚĆ: Resetowanie hasła użytkownika przez Administratora
+//Resetowanie hasła użytkownika przez Admina
 exports.resetPasswordByAdmin = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -337,11 +339,9 @@ exports.resetPasswordByAdmin = async (req, res) => {
             return res.redirect(`/profile?error=${encodeURIComponent('🛑 Nowe hasło musi składać się z minimum 8 znaków.')}`);
         }
 
-        // Zmiana i hashowanie hasła bez pytania o stare poświadczenia
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await userToReset.update({ password: hashedPassword });
 
-        // Wysłanie komunikatu do systemu powiadomień pracownika
         await Notification.create({
             userId: userToReset.id,
             message: `🔒 Twoje hasło dostępowe do konta zostało zresetowane i zmienione przez Administratora systemu.`

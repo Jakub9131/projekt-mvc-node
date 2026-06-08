@@ -1,13 +1,10 @@
-// routes/authRoutes.js
 const { isAuthenticated, isAdmin } = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 
-// Strona logowania / rejestracji (GET)
 router.get('/auth', authController.getAuthPage);
 
-// Obs³uga formularzy (POST)
 router.post('/auth/register', authController.register);
 router.post('/auth/login', authController.login);
 router.get('/auth/logout', authController.logout);

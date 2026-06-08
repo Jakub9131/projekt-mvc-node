@@ -1,4 +1,3 @@
-// models/ResourceOrder.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -11,7 +10,6 @@ const ResourceOrder = sequelize.define('ResourceOrder', {
     resourceType: {
         type: DataTypes.STRING,
         allowNull: false
-        // Walidacja usunięta – brak błędów "Validation isIn failed"
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -38,7 +36,6 @@ const ResourceOrder = sequelize.define('ResourceOrder', {
         type: DataTypes.STRING,
         defaultValue: 'oczekujace',
         allowNull: false
-        // Walidacja usunięta – brak błędów "Validation isIn failed"
     },
     courierName: {
         type: DataTypes.STRING,

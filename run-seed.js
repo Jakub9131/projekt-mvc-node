@@ -1,6 +1,4 @@
-// run-seed.js
 const { Sequelize } = require('sequelize');
-// Upewnij się, że ścieżka do Twojego połączenia z bazą jest poprawna:
 const sequelize = require('./config/database');
 const seeder = require('./seeders/demo-data');
 
@@ -8,7 +6,6 @@ async function run() {
     try {
         console.log('⏳ [SEEDER] Nawiązywanie połączenia z bazą danych...');
 
-        // Pobieramy interfejs zapytań z Twojego istniejącego połączenia
         const queryInterface = sequelize.getQueryInterface();
 
         console.log('🚀 [SEEDER] Rozpoczynam zasilanie bazy danych DeskZone...');
